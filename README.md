@@ -1,2 +1,2 @@
 # new-gcs
-Nrw Game Access - Vue 3
+New Game Access - Vue 3
