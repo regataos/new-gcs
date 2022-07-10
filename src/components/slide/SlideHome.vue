@@ -44,7 +44,7 @@ export default {
     return {
       userLanguage: "pt_BR",
       slides: [],
-      slideshowDuration: 4000,
+      slideshowDuration: 1000,
     };
   },
   async beforeCreate() {
@@ -57,66 +57,60 @@ export default {
     });
   },
   methods: {
-    changeSlide(newIndex, auto) {
-      const slideshow = document.querySelector(".slideshow");
-      if (slideshow.getAttribute("data-wait") == true) return;
+    changeSlide(index, auto) {
+      const that = this;
 
-      const slides = slideshow.querySelectorAll(".slide");
+      const slideshow = $('.slideshow');
+      if (slideshow.data("wait")) return;
+      var slides = slideshow.find(".slide");
+      var activeSlide = slides.filter(".is-active");
+      var activeSlideImage = activeSlide.find(".image-container");
+      var newSlide = slides.eq(index);
+      var newSlideImage = newSlide.find(".image-container");
+      var newSlideContent = newSlide.find(".slide-content");
+      var newSlideElements = newSlide.find(".caption > *");
+      if (newSlide.is(activeSlide)) return;
+      newSlide.addClass("is-new");
 
-      const indexActualSlide = Array.from(slides).findIndex((slide) =>
-        slide.classList.contains("is-active")
-      );
-      const actualSlide = slides[indexActualSlide];
-      const newSlide = slides[newIndex];
-      if (actualSlide == newSlide) return;
+      slideshow.data("wait", true);
 
-      const actualImage = actualSlide.querySelector(".image-container");
-      const newSlideImage = newSlide.querySelector(".image-container");
-      const newSlideContent = newSlide.querySelector(".slide-content");
-      const newSlideElements = newSlide.querySelectorAll(".caption > *");
+      const newSlideRight = newSlide.index() > activeSlide.index() ? 0 : "";
+      const newSlideLeft = newSlide.index() > activeSlide.index() ? "auto" : 0;
+      const newSlideImageRight = newSlide.index() > activeSlide.index() ? -slideshow.width() / 8 : "auto";
+      const newSlideImageLeft = newSlide.index() > activeSlide.index() ? "auto" : -slideshow.width() / 8;
+      const newSlideImageToRight = newSlide.index() > activeSlide.index() ? 0 : "";
+      const newSlideImageToLeft = newSlide.index() > activeSlide.index() ? "auto" : 0;
+      const newSlideContentLeft = newSlide.index() > activeSlide.index() ? "auto" : 0;
+      const newSlideContentRight = newSlide.index() > activeSlide.index() ? 0 : "auto";
+      const activeSlideImageLeft = newSlide.index() > activeSlide.index() ? -slideshow.width() / 4 : slideshow.width() / 4;
 
-      newSlide.classList.add("is-new");
-      //ClearTimeout;
-      slideshow.setAttribute("data-wait", true);
-
-      const direction = newIndex > indexActualSlide ? "next" : "prev";
-
-      const newSlideRight = direction == "next" ? 0 : "";
-      const newSlideLeft = direction == "next" ? "auto" : 0;
-      const newSlideImageRight = direction == "next" ? (slideshow.offsetWidth / 8) * -1 : "auto";
-      const newSlideImageLeft = direction == "next" ? "auto" : (slideshow.offsetWidth / 8) * -1;
-      const newSlideImageToRight = direction == "next" ? 0 : "";
-      const newSlideImageToLeft = direction == "next" ? "auto" : 0;
-      const newSlideContentLeft = direction == "next" ? "auto" : 0;
-      const newSlideContentRight = direction == "next" ? 0 : "auto";
-      const actualSlideImageLeft = direction == "next" ? (slideshow.offsetWidth / 4) * -1 : slideshow.offsetWidth / 4;
-
-      newSlide.setAttribute( "style",
-        `display: "block",
+      newSlide.css({
+        display: "block",
         width: 0,
-        right: ${newSlideRight},
-        left: ${newSlideLeft},
-        zIndex: 2`
-      );
-      newSlideImage.setAttribute( "style",
-        `width: ${slideshow.offsetWidth},
-        right: ${newSlideImageRight},
-        left: ${newSlideImageLeft}`
-      );
-      newSlideContent.setAttribute( "style",
-        `width: ${slideshow.offsetWidth},
-        left: ${newSlideContentLeft},
-        right: ${newSlideContentRight},`
-      );
-      actualImage.setAttribute("style", `left: 0,`);
-
+        right: newSlideRight,
+        left: newSlideLeft,
+        zIndex: 2,
+      });
+      newSlideImage.css({
+        width: slideshow.width(),
+        right: newSlideImageRight,
+        left: newSlideImageLeft,
+      });
+      newSlideContent.css({
+        width: slideshow.width(),
+        left: newSlideContentLeft,
+        right: newSlideContentRight,
+      });
+      activeSlideImage.css({
+        left: 0,
+      });
       TweenMax.set(newSlideElements, { y: 20, force3D: true });
-      TweenMax.to(actualImage, 1, {
-        left: actualSlideImageLeft,
+      TweenMax.to(activeSlideImage, 1, {
+        left: activeSlideImageLeft,
         ease: Power3.easeInOut,
       });
       TweenMax.to(newSlide, 1, {
-        width: slideshow.offsetWidth,
+        width: slideshow.width(),
         ease: Power3.easeInOut,
       });
       TweenMax.to(newSlideImage, 1, {
@@ -132,46 +126,42 @@ export default {
         { alpha: 1, y: 0, ease: Power3.easeOut, force3D: true, delay: 0.6 },
         0.1,
         () => {
-          newSlide.classList.add("is-active");
-          newSlide.classList.remove("is-new");
-          actualSlide.classList.remove("is-active");
-
-          newSlide.setAttribute("style",
-            `display: "",
+          newSlide.addClass("is-active").removeClass("is-new");
+          activeSlide.removeClass("is-active");
+          newSlide.css({
+            display: "",
             width: "",
             left: "",
-            zIndex: ""`
-          );
-          newSlideImage.setAttribute("style",
-            `width: "",
+            zIndex: "",
+          });
+          newSlideImage.css({
+            width: "",
             right: "",
-            left: "",`
-          );
-          newSlideContent.setAttribute("style", `width: "", left: ""`);
-          newSlideElements.forEach(slide => {
-            slide.setAttribute("style", `opacity: "", transform: ""`);
-          })
-          actualImage.setAttribute("style", `left: ""`);
+            left: "",
+          });
+          newSlideContent.css({
+            width: "",
+            left: "",
+          });
+          newSlideElements.css({
+            opacity: "",
+            transform: "",
+          });
+          activeSlideImage.css({
+            left: "",
+          });
 
-          this.changePagination();
+          var pages = slideshow.find(".item");
+          var index = slideshow.find(".slides .is-active").index();
+          pages.removeClass("is-active");
+          pages.eq(index).addClass("is-active");
 
-          slideshow.setAttribute('data-wait', false);
+          slideshow.data("wait", false);
           if (auto) {
             this.setTimeoutChangeSlide();
           }
         }
       );
-    },
-
-    changePagination() {
-      const slides = Array.from(document.querySelectorAll(".slide"));
-      const indexSlideActive = slides.findIndex((slide) => slide.classList.contains("is-active"));
-
-      const actualPage = document.querySelector(".item.is-active");
-      actualPage.classList.remove('is-active');
-      
-      const newPage = document.querySelectorAll('.item')[indexSlideActive];
-      newPage.classList.add('is-active');
     },
 
     setTimeoutChangeSlide() {
