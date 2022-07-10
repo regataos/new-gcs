@@ -3,27 +3,14 @@
     <section class="slideshow">
       <div class="slideshow-inner">
         <div class="slides">
-          <div
+          <Slide
             v-for="(slide, index) in slides"
-            :class="`slide ${index == 0 ? 'is-active' : ''} is-loaded`"
-          >
-            <div class="slide-content">
-              <div class="caption">
-                <div class="title slide-title1">{{ slide.name }}</div>
-                <div class="text slide-desc1">
-                  <p>{{ slide.texts[userLanguage].descText }}</p>
-                </div>
-                <a class="btn">
-                  <span class="btn-inner slide-button1">
-                    {{ slide.texts[userLanguage].buttonText }}
-                  </span>
-                </a>
-              </div>
-            </div>
-            <div class="image-container">
-              <img alt="" class="image slide-img1" :src="slide.image" />
-            </div>
-          </div>
+            :isActive="index == 0"
+            :image="slide.image"
+            :name="slide.name"
+            :desc="slide.texts[userLanguage].descText"
+            :btnText="slide.texts[userLanguage].buttonText"
+          />
 
           <div class="pagination">
             <div class="pagination2">
@@ -38,51 +25,8 @@
           </div>
 
           <div class="arrows">
-            <div :class="`arrow prev`" @click="arrowClick('prev')">
-              <span :class="`svg svg-arrow-prev`">
-                <svg
-                  enable-background="new 0 0 14 26"
-                  height="26px"
-                  id="svg4-Layer_1"
-                  version="1.1"
-                  viewBox="0 0 14 26"
-                  width="14px"
-                  x="0px"
-                  xml:space="preserve"
-                  xmlns="http://www.w3.org/2000/svg"
-                  xmlns:xlink="http://www.w3.org/1999/xlink"
-                  y="0px"
-                >
-                  <path
-                    d="M13,26c-0.256,0-0.512-0.098-0.707-0.293l-12-12c-0.391-0.391-0.391-1.023,0-1.414l12-12c0.391-0.391,1.023-0.391,1.414,0s0.391,1.023,0,1.414L2.414,13l11.293,11.293c0.391,0.391,0.391,1.023,0,1.414C13.512,25.902,13.256,26,13,26z"
-                  />
-                </svg>
-                <span class="alt sr-only" />
-              </span>
-            </div>
-
-            <div :class="`arrow next`" @click="arrowClick('next')">
-              <span :class="`svg svg-arrow-next`">
-                <svg
-                  enable-background="new 0 0 14 26"
-                  height="26px"
-                  id="svg4-Layer_1"
-                  version="1.1"
-                  viewBox="0 0 14 26"
-                  width="14px"
-                  x="0px"
-                  xml:space="preserve"
-                  xmlns="http://www.w3.org/2000/svg"
-                  xmlns:xlink="http://www.w3.org/1999/xlink"
-                  y="0px"
-                >
-                  <path
-                    d="M1,0c0.256,0,0.512,0.098,0.707,0.293l12,12c0.391,0.391,0.391,1.023,0,1.414l-12,12c-0.391,0.391-1.023,0.391-1.414,0s-0.391-1.023,0-1.414L11.586,13L0.293,1.707c-0.391-0.391-0.391-1.023,0-1.414C0.488,0.098,0.744,0,1,0z"
-                  />
-                </svg>
-                <span class="alt sr-only" />
-              </span>
-            </div>
+            <Arrow :direction="'prev'" @arrowClick="arrowClick" />
+            <Arrow :direction="'next'" @arrowClick="arrowClick" />
           </div>
         </div>
       </div>
@@ -91,6 +35,8 @@
 </template>
 
 <script>
+import Slide from "./Slide.vue";
+import Arrow from "./Arrow.vue";
 import { nextTick } from "vue";
 
 export default {
@@ -98,7 +44,7 @@ export default {
     return {
       userLanguage: "pt_BR",
       slides: [],
-      slideshowDuration: 1000,
+      slideshowDuration: 5000,
     };
   },
   async beforeCreate() {
@@ -134,15 +80,19 @@ export default {
 
       const newSlideRight = newIndex > activeSlideIndex ? 0 : "";
       const newSlideLeft = newIndex > activeSlideIndex ? "auto" : 0;
-      const newSlideImageRight = newIndex > activeSlideIndex ? -slideshowWidth / 8 : "auto";
-      const newSlideImageLeft = newIndex > activeSlideIndex ? "auto" : -slideshowWidth / 8;
+      const newSlideImageRight =
+        newIndex > activeSlideIndex ? -slideshowWidth / 8 : "auto";
+      const newSlideImageLeft =
+        newIndex > activeSlideIndex ? "auto" : -slideshowWidth / 8;
       const newSlideImageToRight = newIndex > activeSlideIndex ? 0 : "";
       const newSlideImageToLeft = newIndex > activeSlideIndex ? "auto" : 0;
       const newSlideContentLeft = newIndex > activeSlideIndex ? "auto" : 0;
       const newSlideContentRight = newIndex > activeSlideIndex ? 0 : "auto";
-      const activeSlideImageLeft = newIndex > activeSlideIndex ? -slideshowWidth / 4 : slideshowWidth / 4;
+      const activeSlideImageLeft =
+        newIndex > activeSlideIndex ? -slideshowWidth / 4 : slideshowWidth / 4;
 
-      newSlide.setAttribute( "style",
+      newSlide.setAttribute(
+        "style",
         `
           display: block;
           width: 0;
@@ -188,7 +138,9 @@ export default {
           newSlide.classList.remove("is-new");
           activeSlide.classList.remove("is-active");
 
-          newSlide.setAttribute('style', `
+          newSlide.setAttribute(
+            "style",
+            `
             display: "";
             width: "";
             left: "";
@@ -246,6 +198,7 @@ export default {
       this.changeSlide(indexNewSlide, auto);
     },
   },
+  components: { Slide, Arrow },
 };
 </script>
 
