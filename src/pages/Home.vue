@@ -1,5 +1,5 @@
 <script setup>
-import SlideHome from '../components/SlideHome.vue'
+import SlideHome from '../components/slide/SlideHome.vue'
 </script>
 
 <template>
