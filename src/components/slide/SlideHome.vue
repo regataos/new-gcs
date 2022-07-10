@@ -58,8 +58,6 @@ export default {
   },
   methods: {
     changeSlide(newIndex, auto) {
-      console.log(newIndex, auto);
-
       const slideshow = document.querySelector(".slideshow");
       if (slideshow.getAttribute("data-wait") == true) return;
 
@@ -75,7 +73,7 @@ export default {
       const actualImage = actualSlide.querySelector(".image-container");
       const newSlideImage = newSlide.querySelector(".image-container");
       const newSlideContent = newSlide.querySelector(".slide-content");
-      const newSlideElements = newSlide.querySelector(".caption > *");
+      const newSlideElements = newSlide.querySelectorAll(".caption > *");
 
       newSlide.classList.add("is-new");
       //ClearTimeout;
@@ -93,29 +91,87 @@ export default {
       const newSlideContentRight = direction == "next" ? 0 : "auto";
       const actualSlideImageLeft = direction == "next" ? (slideshow.offsetWidth / 4) * -1 : slideshow.offsetWidth / 4;
 
-      newSlide.setAttribute('style', 
+      newSlide.setAttribute( "style",
         `display: "block",
         width: 0,
         right: ${newSlideRight},
         left: ${newSlideLeft},
         zIndex: 2`
       );
-      newSlideImage.setAttribute('style', 
+      newSlideImage.setAttribute( "style",
         `width: ${slideshow.offsetWidth},
         right: ${newSlideImageRight},
         left: ${newSlideImageLeft}`
-      )
-      newSlideContent.setAttribute('style', 
+      );
+      newSlideContent.setAttribute( "style",
         `width: ${slideshow.offsetWidth},
         left: ${newSlideContentLeft},
         right: ${newSlideContentRight},`
-      )
-      actualImage.setAttribute('style', `left: 0,`)
+      );
+      actualImage.setAttribute("style", `left: 0,`);
 
       TweenMax.set(newSlideElements, { y: 20, force3D: true });
-      TweenMax.to(actualImage, 1, { left: actualSlideImageLeft, ease: Power3.easeInOut });
-      TweenMax.to(newSlide, 1, { width: slideshow.offsetWidth, ease: Power3.easeInOut });
-      TweenMax.to(newSlideImage, 1, { right: newSlideImageToRight, left: newSlideImageToLeft, ease: Power3.easeInOut });
+      TweenMax.to(actualImage, 1, {
+        left: actualSlideImageLeft,
+        ease: Power3.easeInOut,
+      });
+      TweenMax.to(newSlide, 1, {
+        width: slideshow.offsetWidth,
+        ease: Power3.easeInOut,
+      });
+      TweenMax.to(newSlideImage, 1, {
+        right: newSlideImageToRight,
+        left: newSlideImageToLeft,
+        ease: Power3.easeInOut,
+      });
+
+      TweenMax.staggerFromTo(
+        newSlideElements,
+        0.8,
+        { alpha: 0, y: 60 },
+        { alpha: 1, y: 0, ease: Power3.easeOut, force3D: true, delay: 0.6 },
+        0.1,
+        () => {
+          newSlide.classList.add("is-active");
+          newSlide.classList.remove("is-new");
+          actualSlide.classList.remove("is-active");
+
+          newSlide.setAttribute("style",
+            `display: "",
+            width: "",
+            left: "",
+            zIndex: ""`
+          );
+          newSlideImage.setAttribute("style",
+            `width: "",
+            right: "",
+            left: "",`
+          );
+          newSlideContent.setAttribute("style", `width: "", left: ""`);
+          newSlideElements.forEach(slide => {
+            slide.setAttribute("style", `opacity: "", transform: ""`);
+          })
+          actualImage.setAttribute("style", `left: ""`);
+
+          this.changePagination();
+
+          slideshow.setAttribute('data-wait', false);
+          if (auto) {
+            this.setTimeoutChangeSlide();
+          }
+        }
+      );
+    },
+
+    changePagination() {
+      const slides = Array.from(document.querySelectorAll(".slide"));
+      const indexSlideActive = slides.findIndex((slide) => slide.classList.contains("is-active"));
+
+      const actualPage = document.querySelector(".item.is-active");
+      actualPage.classList.remove('is-active');
+      
+      const newPage = document.querySelectorAll('.item')[indexSlideActive];
+      newPage.classList.add('is-active');
     },
 
     setTimeoutChangeSlide() {
