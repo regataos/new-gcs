@@ -3,14 +3,27 @@
     <section class="slideshow">
       <div class="slideshow-inner">
         <div class="slides">
-          <Slide
+          <div
             v-for="(slide, index) in slides"
-            :isActive="index == 0"
-            :image="slide.image"
-            :name="slide.name"
-            :desc="slide.texts[userLanguage].descText"
-            :btnText="slide.texts[userLanguage].buttonText"
-          />
+            :class="`slide ${index == 0 ? 'is-active' : ''} is-loaded`"
+          >
+            <div class="slide-content">
+              <div class="caption">
+                <div class="title slide-title1">{{ slide.name }}</div>
+                <div class="text slide-desc1">
+                  <p>{{ slide.texts[userLanguage].descText }}</p>
+                </div>
+                <a class="btn">
+                  <span class="btn-inner slide-button1">
+                    {{ slide.texts[userLanguage].buttonText }}
+                  </span>
+                </a>
+              </div>
+            </div>
+            <div class="image-container">
+              <img alt="" class="image slide-img1" :src="slide.image" />
+            </div>
+          </div>
 
           <div class="pagination">
             <div class="pagination2">
@@ -25,8 +38,51 @@
           </div>
 
           <div class="arrows">
-            <Arrow :direction="'prev'" @arrowClick="arrowClick" />
-            <Arrow :direction="'next'" @arrowClick="arrowClick" />
+            <div :class="`arrow prev`" @click="arrowClick('prev')">
+              <span :class="`svg svg-arrow-prev`">
+                <svg
+                  enable-background="new 0 0 14 26"
+                  height="26px"
+                  id="svg4-Layer_1"
+                  version="1.1"
+                  viewBox="0 0 14 26"
+                  width="14px"
+                  x="0px"
+                  xml:space="preserve"
+                  xmlns="http://www.w3.org/2000/svg"
+                  xmlns:xlink="http://www.w3.org/1999/xlink"
+                  y="0px"
+                >
+                  <path
+                    d="M13,26c-0.256,0-0.512-0.098-0.707-0.293l-12-12c-0.391-0.391-0.391-1.023,0-1.414l12-12c0.391-0.391,1.023-0.391,1.414,0s0.391,1.023,0,1.414L2.414,13l11.293,11.293c0.391,0.391,0.391,1.023,0,1.414C13.512,25.902,13.256,26,13,26z"
+                  />
+                </svg>
+                <span class="alt sr-only" />
+              </span>
+            </div>
+
+            <div :class="`arrow next`" @click="arrowClick('next')">
+              <span :class="`svg svg-arrow-next`">
+                <svg
+                  enable-background="new 0 0 14 26"
+                  height="26px"
+                  id="svg4-Layer_1"
+                  version="1.1"
+                  viewBox="0 0 14 26"
+                  width="14px"
+                  x="0px"
+                  xml:space="preserve"
+                  xmlns="http://www.w3.org/2000/svg"
+                  xmlns:xlink="http://www.w3.org/1999/xlink"
+                  y="0px"
+                >
+                  <path
+                    d="M1,0c0.256,0,0.512,0.098,0.707,0.293l12,12c0.391,0.391,0.391,1.023,0,1.414l-12,12c-0.391,0.391-1.023,0.391-1.414,0s-0.391-1.023,0-1.414L11.586,13L0.293,1.707c-0.391-0.391-0.391-1.023,0-1.414C0.488,0.098,0.744,0,1,0z"
+                  />
+                </svg>
+                <span class="alt sr-only" />
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -35,8 +91,6 @@
 </template>
 
 <script>
-import Slide from "./Slide.vue";
-import Arrow from "./Arrow.vue";
 import { nextTick } from "vue";
 
 export default {
@@ -58,28 +112,24 @@ export default {
   },
   methods: {
     changeSlide(newIndex, auto) {
-      const slideshow = $('.slideshow');
-      const newSlideshow = document.querySelector('.slideshow');
+      const newSlideshow = document.querySelector(".slideshow");
       const slideshowWidth = newSlideshow.offsetWidth;
 
-      if (newSlideshow.getAttribute("data-wait") == 'true') return
+      if (newSlideshow.getAttribute("data-wait") == "true") return;
 
-      var slides = slideshow.find(".slide");
-      var activeSlide = document.querySelector('.slide.is-active');
-      var activeSlideIndex = Array.from(slides).indexOf(activeSlide);
-      var activeSlideImage = activeSlide.querySelector(".image-container");
+      const slides = newSlideshow.querySelectorAll(".slide");
+      const activeSlide = document.querySelector(".slide.is-active");
+      const activeSlideIndex = Array.from(slides).indexOf(activeSlide);
+      const activeSlideImage = activeSlide.querySelector(".image-container");
 
-      var newSlide = slides.eq(newIndex);
+      const newSlide = slides[newIndex];
+      const newSlideImage = newSlide.querySelector(".image-container");
+      const newSlideContent = newSlide.querySelector(".slide-content");
+      const newSlideElements = newSlide.querySelectorAll(".caption > *");
 
-      slides = newSlideshow.querySelectorAll(".slide");      
-      var testeNewSlide = slides[newIndex];
-      var newSlideImage = testeNewSlide.querySelector(".image-container");
-      var newSlideContent = testeNewSlide.querySelector(".slide-content");
-      var newSlideElements = testeNewSlide.querySelectorAll(".caption > *");
+      if (newSlide == activeSlide) return;
+      newSlide.classList.add("is-new");
 
-      if (testeNewSlide == activeSlide) return;
-      newSlide.addClass("is-new");
-      
       newSlideshow.setAttribute("data-wait", true);
 
       const newSlideRight = newIndex > activeSlideIndex ? 0 : "";
@@ -92,13 +142,15 @@ export default {
       const newSlideContentRight = newIndex > activeSlideIndex ? 0 : "auto";
       const activeSlideImageLeft = newIndex > activeSlideIndex ? -slideshowWidth / 4 : slideshowWidth / 4;
 
-      newSlide.css({
-        display: "block",
-        width: 0,
-        right: newSlideRight,
-        left: newSlideLeft,
-        zIndex: 2,
-      });
+      newSlide.setAttribute( "style",
+        `
+          display: block;
+          width: 0;
+          right: ${newSlideRight};
+          left: ${newSlideLeft};
+          z-index: 2
+        `
+      );
 
       newSlideImage.width = slideshowWidth;
       newSlideImage.right = newSlideImageRight;
@@ -132,16 +184,17 @@ export default {
         { alpha: 1, y: 0, ease: Power3.easeOut, force3D: true, delay: 0.6 },
         0.1,
         () => {
-          testeNewSlide.classList.add("is-active")
-          testeNewSlide.classList.remove("is-new");
+          newSlide.classList.add("is-active");
+          newSlide.classList.remove("is-new");
           activeSlide.classList.remove("is-active");
 
-          newSlide.css({
-            display: "",
-            width: "",
-            left: "",
-            zIndex: "",
-          });
+          newSlide.setAttribute('style', `
+            display: "";
+            width: "";
+            left: "";
+            z-index: "";
+            `
+          );
 
           newSlideImage.width = "";
           newSlideImage.right = "";
@@ -150,16 +203,18 @@ export default {
           newSlideContent.style.width = "";
           newSlideContent.style.left = "";
 
-          newSlideElements.forEach(element => {
+          newSlideElements.forEach((element) => {
             element.style.opacity = "";
             element.style.transform = "";
-          })
+          });
 
           activeSlideImage.style.left = "";
-    
+
           var actualPage = newSlideshow.querySelector(".item.is-active");
           var pages = newSlideshow.querySelectorAll(".item");
-          var newIndex = Array.from(newSlideshow.querySelectorAll(".slide")).findIndex(slide => slide.classList.contains('is-active'))
+          var newIndex = Array.from(
+            newSlideshow.querySelectorAll(".slide")
+          ).findIndex((slide) => slide.classList.contains("is-active"));
           actualPage.classList.remove("is-active");
           pages[newIndex].classList.add("is-active");
 
@@ -191,7 +246,6 @@ export default {
       this.changeSlide(indexNewSlide, auto);
     },
   },
-  components: { Slide, Arrow },
 };
 </script>
 
