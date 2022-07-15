@@ -6,7 +6,7 @@
         <div class="text slide-desc1">
           <p>{{ desc }}</p>
         </div>
-        <a class="btn" @click="btnClick()">
+        <a class="btn" @click="btnClick(btnAction)">
           <span class="btn-inner slide-button1">
             {{ btnText }}
           </span>
@@ -29,12 +29,35 @@ export default defineComponent({
     name: String,
     desc: String,
     btnText: String,
+    btnAction: String,
   },
-  setup(props) {
-    function btnClick() {
-      console.log('btnClick XD')
+  methods: {
+    btnClick(action) {
+      switch(action) {
+        case 'openRockstar':
+          this.openLauncher('rockstar');
+          break;
+
+        case 'openBattleNet':
+          this.openLauncher('battlenet');
+          break;
+
+        case 'openOrigin':
+          this.openLauncher('origin');
+          break;
+
+        case 'openEpicGames':
+          this.openLauncher('epicgames');
+          break;
+
+        default:
+          this.openLauncher('steam');
+      }
+    },
+    openLauncher(launcher) {
+      alert('Abrindo ' + launcher)
     }
-  },
+  }
 });
 </script>
 

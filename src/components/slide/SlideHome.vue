@@ -10,6 +10,7 @@
             :name="slide.name"
             :desc="slide.texts[userLanguage].descText"
             :btnText="slide.texts[userLanguage].buttonText"
+            :btnAction="slide.btnAction"
           />
 
           <div class="pagination">
